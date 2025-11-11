@@ -1,0 +1,9 @@
+# Configuration pour la connexion à TimescaleDB
+# Copiez ce fichier en config.py et modifiez les valeurs selon votre environnement
+
+TIMESCALEDB_HOST = "votre.host.TimescaleDB"
+TIMESCALEDB_PORT = "5432"
+TIMESCALEDB_USER = "telegraf"
+TIMESCALEDB_PASSWORD = "votre_mot_de_passe"
+TIMESCALEDB_DATABASE = "timescaledb2"
+TIMESCALEDB_SSLMODE = "disable"
