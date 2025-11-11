@@ -7,7 +7,7 @@ import socket
 import config
 
 
-def get_file_info(file_path):
+def get_file_info(file_path, name):
     """Récupère les informations d'un fichier"""
     try:
         if not os.path.exists(file_path):
@@ -32,6 +32,7 @@ def get_file_info(file_path):
         return {
             'file_path': file_path,
             'file_name': file_name,
+            'name': name,
             'hostname': hostname,
             'modification_time': modification_time,
             'file_size': file_size
@@ -60,13 +61,14 @@ def write_to_timescaledb(file_info):
         
         # Insertion dans TimescaleDB
         query = """
-            INSERT INTO file_info (time, file_path, file_name, host, modification_time, file_size)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO file_info (time, file_path, file_name, name, host, modification_time, file_size)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(query, (
             timestamp,
             file_info['file_path'],
             file_info['file_name'],
+            file_info['name'],
             file_info['hostname'],
             file_info['modification_time'],
             file_info['file_size']
@@ -82,7 +84,7 @@ def write_to_timescaledb(file_info):
         # Convertir la taille en Mo
         size_mb = file_info['file_size'] / (1024 * 1024)
         
-        print(f"Host: {file_info['hostname']} | Fichier: {file_info['file_name']} | Dernière modification: {date_formatted} | Taille: {size_mb:.1f} Mo")
+        print(f"Host: {file_info['hostname']} | Name: {file_info['name']} | Fichier: {file_info['file_name']} | Dernière modification: {date_formatted} | Taille: {size_mb:.1f} Mo")
         
         return True
     except Exception as e:
@@ -95,16 +97,17 @@ def write_to_timescaledb(file_info):
 
 def main():
     """Fonction principale"""
-    if len(sys.argv) != 2:
-        print("Usage: python3 file-info-to-timescaledb.py <chemin_du_fichier>")
+    if len(sys.argv) != 3:
+        print("Usage: python3 file-info-to-timescaledb.py <chemin_du_fichier> <name>")
         print("\nExemple:")
-        print("  python3 file-info-to-timescaledb.py /var/log/syslog")
+        print("  python3 file-info-to-timescaledb.py /var/log/syslog logs_system")
         sys.exit(1)
     
     file_path = sys.argv[1]
+    name = sys.argv[2]
     
     # Récupérer les informations du fichier
-    file_info = get_file_info(file_path)
+    file_info = get_file_info(file_path, name)
     
     if file_info is None:
         sys.exit(1)
