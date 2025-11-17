@@ -13,6 +13,7 @@ import struct
 from datetime import datetime
 import psycopg2
 import config
+from zoneinfo import ZoneInfo
 
 class XiaomiAdvertisementScanner(btle.DefaultDelegate):
     """Scanner de publicités BLE pour capteurs Xiaomi"""
@@ -66,8 +67,12 @@ class XiaomiAdvertisementScanner(btle.DefaultDelegate):
             # Récupérer le nom du capteur
             name = self.sensors_dict.get(mac, "???")
             
+            # Heure actuelle en timezone Paris
+            now_paris = datetime.now(ZoneInfo("Europe/Paris"))
+            time_str = now_paris.strftime("%Y-%m-%d %H:%M")
+            
             # Affichage sur une seule ligne
-            print(f"{name}  {mac}  🌡️ {temperature:5.1f}°C  💧 {humidity:2d}%  🔋 {battery_pct:3d}% ({battery_mv} mV)  📡 {rssi:3d} dBm  🔢 {counter:3d}")
+            print(f"{time_str}  {name}  {mac}  🌡️ {temperature:5.1f}°C  💧 {humidity:2d}%  🔋 {battery_pct:3d}% ({battery_mv} mV)  📡 {rssi:3d} dBm  🔢 {counter:3d}")
             
             # Stockage
             self.devices_data[mac] = {
