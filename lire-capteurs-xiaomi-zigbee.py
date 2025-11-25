@@ -151,8 +151,8 @@ def listen_mqtt(sensors_dict, db_conn=None, duration=None):
     
     handler = Zigbee2MQTTHandler(sensors_dict, db_conn)
     
-    # Créer le client MQTT
-    client = mqtt.Client()
+    # Créer le client MQTT avec la nouvelle API
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
     handler.client = client
     
     # Configurer les callbacks
