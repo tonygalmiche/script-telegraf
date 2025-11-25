@@ -16,6 +16,10 @@ from zoneinfo import ZoneInfo
 import paho.mqtt.client as mqtt
 import time
 
+# Forcer l'affichage immédiat dans les logs
+sys.stdout.reconfigure(line_buffering=True)
+sys.stderr.reconfigure(line_buffering=True)
+
 class Zigbee2MQTTHandler:
     """Gestionnaire MQTT pour capteurs Zigbee"""
     
@@ -151,8 +155,10 @@ def listen_mqtt(sensors_dict, db_conn=None, duration=None):
     
     handler = Zigbee2MQTTHandler(sensors_dict, db_conn)
     
-    # Créer le client MQTT avec la nouvelle API
-    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
+    # Créer le client MQTT
+    import warnings
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    client = mqtt.Client()
     handler.client = client
     
     # Configurer les callbacks
