@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import psycopg2
-from datetime import datetime
+from datetime import datetime, timezone
 import board
 import adafruit_dht
 from syslog import syslog
@@ -12,7 +12,7 @@ def write_timescaledb(conn, measurement, value, hostname):
     """Écrit les données dans TimescaleDB"""
     try:
         cursor = conn.cursor()
-        timestamp = datetime.now()
+        timestamp = datetime.now(timezone.utc)
         
         # Insertion dans TimescaleDB
         # Adapter le nom de la table selon votre schéma
