@@ -55,7 +55,8 @@ def main() -> None:
                 f"user={config.TIMESCALEDB_USER} "
                 f"password={config.TIMESCALEDB_PASSWORD} "
                 f"dbname={config.TIMESCALEDB_DATABASE} "
-                f"sslmode={config.TIMESCALEDB_SSLMODE}"
+                f"sslmode={config.TIMESCALEDB_SSLMODE} "
+                f"connect_timeout=5"
             )
             conn = psycopg2.connect(connection_string)
             print("Connecté à TimescaleDB")
@@ -75,6 +76,9 @@ def main() -> None:
         else:
             print("Aucune donnée valide à écrire dans TimescaleDB")
         
+    except KeyboardInterrupt:
+        print("\nInterruption par l'utilisateur (CTRL+C)")
+        syslog("Script interrompu par l'utilisateur")
     except Exception as error:
         print(f"ERREUR: {error}")
         print(f"Type d'erreur: {type(error).__name__}")
