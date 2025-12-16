@@ -4,10 +4,11 @@ from datetime import datetime
 import board
 import adafruit_dht
 from syslog import syslog
+import socket
 import config
 
 
-def write_timescaledb(conn, measurement, value):
+def write_timescaledb(conn, measurement, value, hostname):
     """Écrit les données dans TimescaleDB"""
     try:
         cursor = conn.cursor()
@@ -16,10 +17,10 @@ def write_timescaledb(conn, measurement, value):
         # Insertion dans TimescaleDB
         # Adapter le nom de la table selon votre schéma
         query = """
-            INSERT INTO sensor_data (time, measurement, value)
-            VALUES (%s, %s, %s)
+            INSERT INTO sensor_data (time, host, measurement, value)
+            VALUES (%s, %s, %s, %s)
         """
-        cursor.execute(query, (timestamp, measurement, value))
+        cursor.execute(query, (timestamp, hostname, measurement, value))
         conn.commit()
         cursor.close()
         return True
@@ -32,10 +33,12 @@ def write_timescaledb(conn, measurement, value):
 def main() -> None:
     conn = None
     dhtDevice = None
+    hostname = socket.gethostname()
     
     try:
         # Lire les données du capteur d'abord
         print("Initialisation du capteur DHT22...")
+        print(f"Hostname: {hostname}")
         dhtDevice = adafruit_dht.DHT22(board.D4)
         
         print("Lecture de la température...")
@@ -64,14 +67,14 @@ def main() -> None:
             # Écriture dans TimescaleDB
             if temperature is not None:
                 print(f"Écriture de la température ({temperature}°C) dans TimescaleDB...")
-                write_timescaledb(conn, 'temperature', temperature)
-                syslog(f'DHT22 - temperature: {temperature}°C')
+                write_timescaledb(conn, 'temperature', temperature, hostname)
+                syslog(f'DHT22 - {hostname} - temperature: {temperature}°C')
                 print("Température écrite avec succès")
             
             if humidity is not None:
                 print(f"Écriture de l'humidité ({humidity}%) dans TimescaleDB...")
-                write_timescaledb(conn, 'humidity', humidity)
-                syslog(f'DHT22 - humidity: {humidity}%')
+                write_timescaledb(conn, 'humidity', humidity, hostname)
+                syslog(f'DHT22 - {hostname} - humidity: {humidity}%')
                 print("Humidité écrite avec succès")
         else:
             print("Aucune donnée valide à écrire dans TimescaleDB")
